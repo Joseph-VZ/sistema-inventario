@@ -6,7 +6,7 @@ class Producto:
         self.existencia = existencia
 
     def mostrar_informacion(self):
-        print("----- Información del producto -----")
+        print("Producto disponible")
         print(f"Código:     {self.codigo}")
         print(f"Nombre:     {self.nombre}")
         print(f"Precio:     ${self.precio:.2f}")

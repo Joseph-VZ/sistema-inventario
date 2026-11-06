@@ -26,3 +26,7 @@ jobs:
       - name: Ejecutar módulo Producto
         working-directory: src
         run: python Producto.py
+
+      - name: Ejecutar módulo de búsqueda
+        working-directory: src
+        run: python busqueda.py

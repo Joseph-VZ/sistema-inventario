@@ -1,8 +1,9 @@
-name: Build - Sistema de Inventario
+
+name: Build y Tests - Sistema de Inventario
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, 'test/**' ]
   pull_request:
     branches: [ main ]
   workflow_dispatch:
@@ -22,6 +23,9 @@ jobs:
 
       - name: Verificar sintaxis del proyecto
         run: python -m compileall -q src
+
+      - name: Ejecutar pruebas unitarias
+        run: python -m unittest discover -s tests -v
 
       - name: Ejecutar módulo Producto
         working-directory: src

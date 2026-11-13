@@ -1,7 +1,25 @@
-
 # Registro de cambios
 
 Todos los cambios importantes del Sistema de Inventario se documentan en este archivo.
+
+## [v1.0.2] - 2026-11-12
+
+### Corregido
+- Corregido el error en la visualización del precio de los productos.
+- Se restauró la presentación del precio almacenado originalmente.
+
+### Pruebas
+- 7 de 7 pruebas unitarias satisfactorias.
+- Workflow de liberación ejecutado correctamente.
+- Paquete ZIP generado y publicado en GitHub Releases.
+
+## [v1.0.1] - 2026-11-12
+
+### Validación de errores
+- Se introdujo intencionalmente un error en la visualización del precio.
+- 3 pruebas unitarias detectaron el error.
+- El workflow de GitHub Actions falló durante la ejecución de las pruebas.
+- La versión no fue publicada debido al fallo de validación.
 
 ## [v1.0.0] - 2026-11-12
 

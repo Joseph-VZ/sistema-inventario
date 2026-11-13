@@ -20,7 +20,7 @@ class Producto: #Antes: class Producto:
         # Detectan el error: test_cp04_precio, test_cp06_mostrar_informacion_completa
         # y test_cp07_segundo_producto_independiente.
         # Después de comprobarlo, regresar la línea a como está ahora.
-        print(f"Precio:     ${self.precio + 100:.2f}")
+        print(f"Precio:     ${self.precio:.2f}")
         print(f"Existencia: {self.existencia} unidades")
 
 

@@ -5,6 +5,12 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Etiqueta de la version que se desea publicar'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -16,6 +22,8 @@ jobs:
     steps:
       - name: Descargar repositorio
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag_name || github.ref }}
 
       - name: Preparar Python
         uses: actions/setup-python@v5
@@ -26,10 +34,11 @@ jobs:
         run: python -m unittest discover -s tests -v
 
       - name: Crear paquete
-        run: zip -r sistema-inventario-${GITHUB_REF_NAME}.zip src/
+        run: zip -r sistema-inventario-${{ inputs.tag_name || github.ref_name }}.zip src/
 
       - name: Publicar version
         uses: softprops/action-gh-release@v2
         with:
-          files: sistema-inventario-${{ github.ref_name }}.zip
+          tag_name: ${{ inputs.tag_name || github.ref_name }}
+          files: sistema-inventario-${{ inputs.tag_name || github.ref_name }}.zip
           generate_release_notes: true

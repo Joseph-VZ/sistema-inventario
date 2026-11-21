@@ -2,6 +2,12 @@
 
 Todos los cambios importantes del Sistema de Inventario se documentan en este archivo.
 
+## [v1.1.0] - 2026-11-20
+
+### Agregado
+- Menú principal `src/main.py`: registrar, mostrar y buscar productos.
+- Workflow de despliegue `deploy.yml`.
+
 ## [v1.0.2] - 2026-11-12
 
 ### Corregido

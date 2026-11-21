@@ -1,0 +1,104 @@
+name: Despliegue del Sistema de Inventario
+
+# Despliegue en el entorno del runner de GitHub Actions (ubuntu-latest).
+# Se ejecuta manualmente desde la pestaña Actions y permite elegir la versión
+# publicada en GitHub Releases, lo que también sirve para recuperar una
+# versión anterior (rollback).
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Versión a desplegar (tag publicado en GitHub Releases)"
+        required: true
+        default: "v1.0.2"
+      simular_falla:
+        description: "Simular un problema en el despliegue (elimina Producto.py)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      VERSION: ${{ inputs.version }}
+      PAQUETE: sistema-inventario-${{ inputs.version }}.zip
+      DESTINO: despliegue/${{ inputs.version }}
+
+    steps:
+      - name: Descargar versión liberada
+        uses: robinraju/release-downloader@v1
+        with:
+          repository: ${{ github.repository }}
+          tag: ${{ inputs.version }}
+          fileName: sistema-inventario-${{ inputs.version }}.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Preparar entorno de ejecución (Python)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verificar requisitos del entorno
+        run: |
+          uname -a
+          python --version
+          unzip -v | head -1
+
+      - name: Preparar directorio y extraer paquete
+        run: |
+          ls -lh "$PAQUETE"
+          mkdir -p "$DESTINO"
+          unzip -o "$PAQUETE" -d "$DESTINO"
+
+      - name: Verificar archivos desplegados
+        run: |
+          ls -R "$DESTINO"
+          test -f "$DESTINO/src/Producto.py"
+          test -f "$DESTINO/src/busqueda.py"
+
+      - name: Simular problema en el despliegue
+        if: ${{ inputs.simular_falla }}
+        run: |
+          echo "::warning::Simulación de falla: se elimina src/Producto.py de la versión desplegada"
+          rm "$DESTINO/src/Producto.py"
+
+      - name: Ejecutar y verificar el Sistema de Inventario
+        working-directory: ${{ env.DESTINO }}
+        run: |
+          set -o pipefail
+          if [ -f src/main.py ]; then
+            echo "== Ejecutando src/main.py (registrar, mostrar y buscar) =="
+            printf '1\nP100\nMonitor 24 pulgadas\n2500\n5\n2\n3\nmonitor\n4\n' | python src/main.py | tee salida.txt
+            grep -q "Producto registrado correctamente" salida.txt
+          else
+            echo "== Ejecutando src/busqueda.py =="
+            python src/busqueda.py | tee salida.txt
+          fi
+          grep -q "Producto disponible" salida.txt
+          grep -q "Precio:" salida.txt
+          echo "Verificación correcta: el sistema inició y mostró productos."
+
+      - name: Resumen del despliegue
+        if: always()
+        run: |
+          {
+            echo "## Despliegue $VERSION"
+            echo "- Paquete: \`$PAQUETE\`"
+            echo "- Destino: \`$DESTINO\`"
+            echo "- Falla simulada: ${{ inputs.simular_falla }}"
+            echo "- Resultado: ${{ job.status }}"
+            if [ -f "$DESTINO/salida.txt" ]; then
+              echo '```'; cat "$DESTINO/salida.txt"; echo '```'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Conservar la versión desplegada como artefacto
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: despliegue-${{ inputs.version }}
+          path: despliegue/
